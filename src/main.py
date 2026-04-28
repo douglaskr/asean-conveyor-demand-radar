@@ -62,14 +62,14 @@ def load_yaml(path: str) -> dict:
 
 def build_rss_query_pack() -> list[dict[str, str]]:
     return [
-        {"query_group": "asean_industry", "query_name": "ASEAN conveyor material handling", "query_text": "ASEAN conveyor material handling"},
-        {"query_group": "asean_industry", "query_name": "ASEAN mining coal nickel conveyor", "query_text": "ASEAN mining coal nickel conveyor"},
-        {"query_group": "asean_industry", "query_name": "ASEAN cement power plant conveyor", "query_text": "ASEAN cement power plant coal handling"},
-        {"query_group": "asean_industry", "query_name": "ASEAN port warehouse logistics", "query_text": "ASEAN port bulk logistics warehouse"},
+        {"query_group": "asean_industry", "query_name": "ASEAN conveyor", "query_text": "ASEAN conveyor"},
+        {"query_group": "asean_industry", "query_name": "ASEAN material handling", "query_text": "ASEAN material handling"},
+        {"query_group": "asean_industry", "query_name": "ASEAN mining coal nickel", "query_text": "ASEAN mining coal nickel conveyor"},
+        {"query_group": "asean_industry", "query_name": "ASEAN cement and power", "query_text": "ASEAN cement power plant coal handling"},
+        {"query_group": "asean_industry", "query_name": "ASEAN port logistics", "query_text": "ASEAN port warehouse logistics bulk terminal"},
         {"query_group": "asean_industry", "query_name": "ASEAN food palm oil processing", "query_text": "ASEAN palm oil food processing conveyor"},
-        {"query_group": "global_risk", "query_name": "Red Sea Suez disruption", "query_text": "Red Sea Suez shipping disruption port congestion"},
-        {"query_group": "global_risk", "query_name": "Shipping delays and port congestion", "query_text": "Asia port congestion shipping delay freight disruption"},
-        {"query_group": "global_risk", "query_name": "Energy and commodity shock", "query_text": "coal LNG oil price energy shock commodity shock Asia"},
+        {"query_group": "global_risk", "query_name": "Shipping disruption", "query_text": "shipping disruption red sea suez port congestion"},
+        {"query_group": "global_risk", "query_name": "Commodity and energy shock", "query_text": "commodity shock energy shock oil LNG coal price"},
     ]
 
 
@@ -86,15 +86,17 @@ def run_pipeline() -> None:
     product_cfg = load_yaml("config/product_mapping.yaml")
     report_cfg = load_yaml("config/report_settings.yaml")
 
-    collection_mode = report_cfg.get("collection_mode", "rss_preferred")
-    logger.info("Weekly run started for %s (mode=%s)", wid, collection_mode)
+    collection_mode = report_cfg.get("collection_mode", "rss")
+    validation_mode = report_cfg.get("validation_mode", "rss_preferred")
+    logger.info("Weekly run started for %s (collection_mode=%s, validation_mode=%s)", wid, collection_mode, validation_mode)
     init_db()
 
     query_meta: list[dict] = []
     news_df = pd.DataFrame()
     risk_df = pd.DataFrame()
 
-    if collection_mode in {"rss_preferred", "validation_mode", "rss_only"}:
+    use_rss_primary = collection_mode == "rss" or validation_mode in {"rss_only", "rss_preferred", "gdelt_optional"}
+    if use_rss_primary:
         try:
             rss_queries = build_rss_query_pack()
             query_meta.extend({"source_type": "rss", **q} for q in rss_queries)
@@ -106,8 +108,12 @@ def run_pipeline() -> None:
             logger.error("RSS collection failed: %s", exc)
             logger.debug(traceback.format_exc())
 
-    # Optional fallback only: run GDELT when RSS is empty or explicit gdelt_only mode.
-    should_try_gdelt = collection_mode == "gdelt_only" or (news_df.empty and risk_df.empty)
+    # Optional only: GDELT can support RSS runs but must not be the primary source.
+    should_try_gdelt = (
+        report_cfg.get("enable_gdelt_fallback", True)
+        and validation_mode in {"rss_preferred", "gdelt_optional"}
+        and (news_df.empty and risk_df.empty)
+    )
     if should_try_gdelt:
         logger.warning("Using GDELT fallback collection due to empty RSS results or gdelt_only mode.")
         try:

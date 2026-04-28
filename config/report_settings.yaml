@@ -9,5 +9,6 @@ report:
   company_name: "DRB"
   date_format: "%Y-%m-%d"
 
-collection_mode: "rss_preferred"
+collection_mode: "rss"
+validation_mode: "rss_preferred"  # rss_only | rss_preferred | gdelt_optional
 enable_gdelt_fallback: true
