@@ -25,6 +25,10 @@ class GlobalRiskCollector:
                 self.logger.warning("No global risk data collected for topic: %s", name)
                 continue
 
+            df["source_type"] = "gdelt"
+            df["query_group"] = "global_risk"
+            df["query_name"] = name
+            df["query_text"] = query
             df["risk_topic"] = name
             frames.append(df)
 

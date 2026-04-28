@@ -26,6 +26,12 @@ from src.reporting.ppt_report_kr import build_ppt_kr
 from src.reporting.ppt_report_en import build_ppt_en
 from src.reporting.pdf_exporter import export_ppt_to_pdf
 from src.reporting.excel_exporter import export_excel
+from src.reporting.debug_exporter import (
+    build_article_sample,
+    build_classification_summary,
+    build_query_summary,
+    export_debug_workbooks,
+)
 from src.storage.database import init_db
 from src.storage.history_manager import save_weekly_scores
 from src.utils.date_utils import week_id
@@ -70,19 +76,42 @@ def run_pipeline() -> None:
 
     news_df = pd.DataFrame()
     risk_df = pd.DataFrame()
+    query_meta: list[dict] = []
 
     try:
         collector = GDELTNewsCollector()
         asean_country_query = "(" + " OR ".join([f'"{c}"' for c in countries_cfg["countries"]]) + ")"
         conveyor_query = "(" + " OR ".join([f'"{k}"' for k in CONVEYOR_KEYWORDS]) + ")"
         query = f"{asean_country_query} AND {conveyor_query}"
+        query_meta.append(
+            {
+                "source_type": "gdelt",
+                "query_group": "asean_industry",
+                "query_name": "ASEAN Conveyor Core Query",
+                "query_text": query,
+            }
+        )
         news_df = collector.fetch(query)
+        if not news_df.empty:
+            news_df["source_type"] = "gdelt"
+            news_df["query_group"] = "asean_industry"
+            news_df["query_name"] = "ASEAN Conveyor Core Query"
+            news_df["query_text"] = query
         logger.info("Collected conveyor news: %d", len(news_df))
     except Exception as exc:
         logger.error("Collector failed (conveyor news): %s", exc)
         logger.debug(traceback.format_exc())
 
     try:
+        for topic in risks_cfg["global_risks"]:
+            query_meta.append(
+                {
+                    "source_type": "gdelt",
+                    "query_group": "global_risk",
+                    "query_name": topic["name"],
+                    "query_text": " OR ".join(topic.get("keywords", [])),
+                }
+            )
         risk_collector = GlobalRiskCollector(GDELTNewsCollector())
         risk_df = risk_collector.fetch_by_topics(risks_cfg["global_risks"])
         logger.info("Collected global risk news: %d", len(risk_df))
@@ -91,6 +120,11 @@ def run_pipeline() -> None:
         logger.debug(traceback.format_exc())
 
     all_news = pd.concat([news_df, risk_df], ignore_index=True) if not news_df.empty or not risk_df.empty else pd.DataFrame(columns=["title", "url"])
+
+    cleaned = pd.DataFrame()
+    deduped = pd.DataFrame()
+    relevant = pd.DataFrame()
+    classified = pd.DataFrame()
 
     try:
         cleaned = clean_news(all_news)
@@ -151,6 +185,21 @@ def run_pipeline() -> None:
                 logger.warning("%s -> %s", p.name, msg)
     except Exception as exc:
         logger.error("PPT/PDF generation failed: %s", exc)
+
+    try:
+        query_summary = build_query_summary(
+            query_meta=query_meta,
+            raw_df=all_news,
+            cleaned_df=cleaned,
+            relevant_df=relevant,
+            classified_df=scored_news,
+        )
+        article_sample = build_article_sample(scored_news)
+        class_summary = build_classification_summary(scored_news)
+        export_debug_workbooks(weekly_dir, query_summary, article_sample, class_summary)
+        logger.info("Debug workbooks exported for diagnostics")
+    except Exception as exc:
+        logger.error("Debug export failed: %s", exc)
 
     try:
         copy_to_latest(weekly_dir, latest_dir)
