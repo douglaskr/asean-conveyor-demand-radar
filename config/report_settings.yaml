@@ -1,0 +1,14 @@
+report:
+  title_kr: "ASEAN 컨베이어 수요 레이더"
+  title_en: "ASEAN Conveyor Demand Radar"
+  primary_color: "#00897B"
+  secondary_color: "#1B3A57"
+  accent_color: "#4DB6AC"
+  page_count: 7
+  language_versions: ["kr", "en"]
+  company_name: "DRB"
+  date_format: "%Y-%m-%d"
+
+collection_mode: "rss"
+validation_mode: "rss_preferred"  # rss_only | rss_preferred | gdelt_optional
+enable_gdelt_fallback: true
