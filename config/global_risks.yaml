@@ -1,0 +1,13 @@
+global_risks:
+  - name: Middle East conflict
+    keywords: ["middle east conflict", "gaza", "iran", "israel"]
+  - name: Red Sea / Suez Canal disruption
+    keywords: ["red sea", "suez", "houthi", "shipping route"]
+  - name: Russia-Ukraine war impact
+    keywords: ["russia ukraine", "black sea", "sanctions", "grain corridor"]
+  - name: Asia-Pacific natural disasters
+    keywords: ["earthquake", "flood", "typhoon", "volcano", "landslide"]
+  - name: port and shipping disruption
+    keywords: ["port congestion", "strike", "shipping disruption", "freight delay"]
+  - name: commodity and energy shock
+    keywords: ["coal price", "oil price", "lng", "commodity shock", "energy shock"]
