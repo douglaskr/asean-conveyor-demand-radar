@@ -1,0 +1,10 @@
+weights:
+  relevance: 0.35
+  sentiment: 0.20
+  risk_intensity: 0.20
+  volume: 0.15
+  recency: 0.10
+risk_direction:
+  positive: 1
+  neutral: 0
+  negative: -1
