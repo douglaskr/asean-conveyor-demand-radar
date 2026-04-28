@@ -1,0 +1,8 @@
+product_mapping:
+  mining_coal_nickel: ["abrasion-resistant belt", "heavy-duty EP belt"]
+  cement_construction_materials: ["heat-resistant belt", "abrasion-resistant belt"]
+  power_generation: ["flame-resistant belt", "anti-static belt", "heat-resistant belt"]
+  port_bulk_logistics: ["heavy-duty belt", "impact-resistant belt", "low-stretch belt"]
+  manufacturing: ["general conveyor belt", "anti-static belt"]
+  food_palm_oil_agri_processing: ["oil-resistant belt", "general conveyor belt"]
+  warehouse_logistics: ["HRP", "H-HRP", "EPJ"]

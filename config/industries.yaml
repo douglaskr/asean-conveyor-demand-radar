@@ -1,0 +1,15 @@
+industries:
+  mining_coal_nickel:
+    keywords: ["mining", "coal", "nickel", "smelter", "ore", "quarry"]
+  cement_construction_materials:
+    keywords: ["cement", "clinker", "construction material", "aggregate", "ready-mix"]
+  power_generation:
+    keywords: ["power plant", "generation", "coal-fired", "biomass", "utility"]
+  port_bulk_logistics:
+    keywords: ["port", "terminal", "bulk", "shiploader", "stacker reclaimer"]
+  manufacturing:
+    keywords: ["factory", "manufacturing", "industrial production", "assembly"]
+  food_palm_oil_agri_processing:
+    keywords: ["palm oil", "agri", "processing", "mill", "food processing"]
+  warehouse_logistics:
+    keywords: ["warehouse", "distribution center", "intralogistics", "fulfillment"]
