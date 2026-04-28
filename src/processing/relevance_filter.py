@@ -17,6 +17,9 @@ def filter_relevant_news(df: pd.DataFrame, keywords: list[str], min_relevance_sc
     out["matched_keywords"] = text.astype(str).apply(lambda t: ", ".join(_hits(t)))
     out["relevance"] = text.astype(str).apply(lambda t: len(_hits(t)))
 
-    broad_groups = out.get("query_group", pd.Series("", index=out.index)).isin(["global_risk", "macro_supply_chain"])
-    mask = (out["relevance"] >= min_relevance_score) | broad_groups
+    query_group = out.get("query_group", pd.Series("", index=out.index))
+    broad_groups = query_group.isin(["global_risk", "macro_supply_chain", "risk_queries"])
+    investigation_groups = query_group.isin(["core_queries", "country_queries", "industry_queries"])
+    non_trivial_text = text.astype(str).str.len() >= 25
+    mask = (out["relevance"] >= min_relevance_score) | broad_groups | (investigation_groups & non_trivial_text)
     return out[mask].reset_index(drop=True)

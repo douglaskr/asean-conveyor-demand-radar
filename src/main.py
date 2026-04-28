@@ -61,16 +61,62 @@ def load_yaml(path: str) -> dict:
 
 
 def build_rss_query_pack() -> list[dict[str, str]]:
-    return [
-        {"query_group": "asean_industry", "query_name": "ASEAN conveyor", "query_text": "ASEAN conveyor"},
-        {"query_group": "asean_industry", "query_name": "ASEAN material handling", "query_text": "ASEAN material handling"},
-        {"query_group": "asean_industry", "query_name": "ASEAN mining coal nickel", "query_text": "ASEAN mining coal nickel conveyor"},
-        {"query_group": "asean_industry", "query_name": "ASEAN cement and power", "query_text": "ASEAN cement power plant coal handling"},
-        {"query_group": "asean_industry", "query_name": "ASEAN port logistics", "query_text": "ASEAN port warehouse logistics bulk terminal"},
-        {"query_group": "asean_industry", "query_name": "ASEAN food palm oil processing", "query_text": "ASEAN palm oil food processing conveyor"},
-        {"query_group": "global_risk", "query_name": "Shipping disruption", "query_text": "shipping disruption red sea suez port congestion"},
-        {"query_group": "global_risk", "query_name": "Commodity and energy shock", "query_text": "commodity shock energy shock oil LNG coal price"},
+    core_queries = [
+        {"query_group": "core_queries", "query_name": "ASEAN conveyor industry", "query_text": "ASEAN conveyor industry"},
+        {"query_group": "core_queries", "query_name": "ASEAN material handling", "query_text": "ASEAN material handling"},
+        {"query_group": "core_queries", "query_name": "Southeast Asia conveyor", "query_text": "Southeast Asia conveyor"},
+        {"query_group": "core_queries", "query_name": "Southeast Asia bulk handling", "query_text": "Southeast Asia bulk handling"},
+        {"query_group": "core_queries", "query_name": "Southeast Asia industrial belt", "query_text": "Southeast Asia industrial belt"},
+        {"query_group": "core_queries", "query_name": "ASEAN warehouse automation", "query_text": "ASEAN warehouse automation"},
+        {"query_group": "core_queries", "query_name": "ASEAN logistics automation", "query_text": "ASEAN logistics automation"},
     ]
+
+    countries = ["Indonesia", "Vietnam", "Thailand", "Malaysia", "Philippines", "Singapore"]
+    country_templates = [
+        "{country} conveyor material handling",
+        "{country} port logistics bulk terminal",
+        "{country} mining coal nickel cement",
+        "{country} warehouse manufacturing power plant",
+    ]
+    country_queries: list[dict[str, str]] = []
+    for country in countries:
+        for template in country_templates:
+            text = template.format(country=country)
+            country_queries.append(
+                {
+                    "query_group": "country_queries",
+                    "query_name": f"{country} - {template.replace('{country} ', '')}",
+                    "query_text": text,
+                }
+            )
+
+    industry_queries = [
+        {"query_group": "industry_queries", "query_name": "Mining conveyor projects", "query_text": "ASEAN mining conveyor project expansion"},
+        {"query_group": "industry_queries", "query_name": "Coal handling systems", "query_text": "ASEAN coal handling conveyor plant"},
+        {"query_group": "industry_queries", "query_name": "Nickel processing logistics", "query_text": "Indonesia nickel processing conveyor logistics"},
+        {"query_group": "industry_queries", "query_name": "Cement production logistics", "query_text": "Southeast Asia cement plant conveyor"},
+        {"query_group": "industry_queries", "query_name": "Power generation handling", "query_text": "ASEAN power plant coal ash handling"},
+        {"query_group": "industry_queries", "query_name": "Port logistics equipment", "query_text": "ASEAN port logistics conveyor equipment"},
+        {"query_group": "industry_queries", "query_name": "Bulk handling terminals", "query_text": "Southeast Asia bulk terminal material handling"},
+        {"query_group": "industry_queries", "query_name": "Warehouse distribution centers", "query_text": "ASEAN warehouse distribution center automation"},
+        {"query_group": "industry_queries", "query_name": "Manufacturing conveyor upgrades", "query_text": "ASEAN manufacturing conveyor line expansion"},
+        {"query_group": "industry_queries", "query_name": "Food and palm oil processing", "query_text": "ASEAN palm oil food processing conveyor"},
+    ]
+
+    risk_queries = [
+        {"query_group": "risk_queries", "query_name": "Shipping disruption", "query_text": "shipping disruption Asia supply chain"},
+        {"query_group": "risk_queries", "query_name": "Port congestion", "query_text": "Asia port congestion shipping delay"},
+        {"query_group": "risk_queries", "query_name": "Red Sea route risk", "query_text": "Red Sea shipping disruption Asia imports"},
+        {"query_group": "risk_queries", "query_name": "Suez Canal delay", "query_text": "Suez Canal delay shipping Asia"},
+        {"query_group": "risk_queries", "query_name": "Commodity shock", "query_text": "commodity shock Asia industrial demand"},
+        {"query_group": "risk_queries", "query_name": "Energy shock", "query_text": "energy shock Asia manufacturing costs"},
+        {"query_group": "risk_queries", "query_name": "Coal price volatility", "query_text": "coal price spike Asia power generation"},
+        {"query_group": "risk_queries", "query_name": "LNG market volatility", "query_text": "LNG price volatility Asia industry"},
+        {"query_group": "risk_queries", "query_name": "Oil price movement", "query_text": "oil price volatility Asia logistics"},
+        {"query_group": "risk_queries", "query_name": "ASEAN natural disasters", "query_text": "ASEAN flood typhoon earthquake logistics disruption"},
+    ]
+
+    return core_queries + country_queries + industry_queries + risk_queries
 
 
 def run_pipeline() -> None:
@@ -101,8 +147,10 @@ def run_pipeline() -> None:
             rss_queries = build_rss_query_pack()
             query_meta.extend({"source_type": "rss", **q} for q in rss_queries)
             rss_df = RSSNewsCollector().fetch_query_pack(rss_queries)
-            news_df = rss_df[rss_df["query_group"] == "asean_industry"].copy() if not rss_df.empty else pd.DataFrame()
-            risk_df = rss_df[rss_df["query_group"] == "global_risk"].copy() if not rss_df.empty else pd.DataFrame()
+            industry_groups = {"core_queries", "country_queries", "industry_queries", "asean_industry"}
+            risk_groups = {"risk_queries", "global_risk"}
+            news_df = rss_df[rss_df["query_group"].isin(industry_groups)].copy() if not rss_df.empty else pd.DataFrame()
+            risk_df = rss_df[rss_df["query_group"].isin(risk_groups)].copy() if not rss_df.empty else pd.DataFrame()
             logger.info("Collected RSS news (industry=%d, risk=%d)", len(news_df), len(risk_df))
         except Exception as exc:
             logger.error("RSS collection failed: %s", exc)
