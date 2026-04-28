@@ -198,8 +198,10 @@ def run_pipeline() -> None:
         logger.error("Chart generation failed: %s", exc)
 
     try:
-        kr_ppt = build_ppt_kr(build_kr_texts(wid), charts, weekly_dir / f"asean_conveyor_radar_{wid}_KR.pptx")
-        en_ppt = build_ppt_en(build_en_texts(wid), charts, weekly_dir / f"asean_conveyor_radar_{wid}_EN.pptx")
+        kr_texts = build_kr_texts(wid, scored_news, country_scores, industry_scores, demand_pressure, sales_priority)
+        en_texts = build_en_texts(wid, scored_news, country_scores, industry_scores, demand_pressure, sales_priority)
+        kr_ppt = build_ppt_kr(kr_texts, charts, weekly_dir / f"asean_conveyor_radar_{wid}_KR.pptx")
+        en_ppt = build_ppt_en(en_texts, charts, weekly_dir / f"asean_conveyor_radar_{wid}_EN.pptx")
         logger.info("PPT exported: %s, %s", kr_ppt.name, en_ppt.name)
 
         for p in [kr_ppt, en_ppt]:

@@ -42,7 +42,8 @@ def build_ppt_kr(texts: dict, charts: dict[str, Path], out_path: Path) -> Path:
         _add_page_badge(slide, idx)
 
         summary = slide.shapes.add_textbox(Inches(0.5), Inches(1.1), Inches(12.2), Inches(1.1))
-        summary.text_frame.text = "자동 생성 해석 박스: 점수와 뉴스 흐름을 기반으로 영업 우선순위를 제시합니다."
+        summaries = texts.get("summaries", [])
+        summary.text_frame.text = summaries[idx - 1] if idx - 1 < len(summaries) else ""
 
         if idx == 2 and charts.get("country") and charts["country"].exists():
             slide.shapes.add_picture(str(charts["country"]), Inches(0.7), Inches(2.2), width=Inches(11.5))
