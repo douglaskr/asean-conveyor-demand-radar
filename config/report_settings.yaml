@@ -8,3 +8,6 @@ report:
   language_versions: ["kr", "en"]
   company_name: "DRB"
   date_format: "%Y-%m-%d"
+
+collection_mode: "rss_preferred"
+enable_gdelt_fallback: true
