@@ -1,91 +1,24 @@
-# asean-conveyor-demand-radar
+# 억억이 프로젝트
 
-Production-ready Python project template for **weekly ASEAN conveyor demand intelligence**.
+**매일 한 걸음, 함께 1억까지.**
 
-## What this system does
+허성은과 김도영이 각자 1억 원을 목표로 기록하는 모바일 투자 대시보드입니다.
 
-This pipeline runs weekly and performs:
-1. Collects last-7-day ASEAN conveyor-related news + global risk/disaster news from GDELT.
-2. Cleans and deduplicates articles.
-3. Classifies by country, industry, and risk topic.
-4. Scores demand signals and estimates demand pressure.
-5. Stores weekly history in SQLite.
-6. Exports Excel source data.
-7. Generates Korean + English 7-page PPT reports.
-8. Attempts PPT-to-PDF export (if LibreOffice `soffice` is installed).
-9. Saves weekly outputs to `outputs/weekly/YYYY-WW/` and copies to `outputs/latest/`.
-10. Logs execution to `logs/weekly_run.log`.
+## 주요 기능
 
-## Project structure
+- 각자 자산·누적수익·목표 진행률 별도 계산
+- 일별 수익 및 손실 입력
+- 최근 14일 수익 그래프
+- 개별 업데이트 기록 확인
+- 모바일·카카오톡 링크 사용 최적화
 
-```text
-config/
-  countries.yaml
-  industries.yaml
-  global_risks.yaml
-  product_mapping.yaml
-  scoring_weights.yaml
-  report_settings.yaml
+## 현재 기준
 
-src/
-  main.py
-  collectors/
-  processing/
-  scoring/
-  reporting/
-  storage/
-  utils/
+- 허성은 시작 원금: **2,000,000원**
+- 김도영 시작 원금: **2,000,000원**
+- 허성은 기존 누적수익: **100,000원**
+- 김도영 기존 누적수익: **130,000원**
+- 목표 금액: **각자 100,000,000원**
+- 기준 일수익률: **2%**
 
-outputs/
-  weekly/
-  latest/
-logs/
-  weekly_run.log
-
-data/
-  radar_history.db
-```
-
-## 1) Install requirements (Windows + VS Code)
-
-```powershell
-# From repository root
-python -m venv .venv
-.\.venv\Scripts\activate
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-## 2) Run report manually
-
-```powershell
-.\.venv\Scripts\activate
-python -m src.main
-```
-
-After running, check:
-- `outputs/weekly/YYYY-WW/`
-- `outputs/latest/`
-- `logs/weekly_run.log`
-
-## 3) Set Windows Task Scheduler (weekly)
-
-1. Open **Task Scheduler** → **Create Task**.
-2. **General** tab:
-   - Name: `ASEAN Conveyor Weekly Radar`
-   - Select "Run whether user is logged on or not".
-3. **Triggers** tab:
-   - New → Weekly → pick day/time (e.g., Monday 07:00).
-4. **Actions** tab:
-   - New → Action: "Start a program"
-   - Program/script: full path to `run_weekly.bat`
-     - Example: `C:\Users\<you>\projects\asean-conveyor-demand-radar\run_weekly.bat`
-5. **Start in** (important): repository folder path.
-6. Save and test with **Run**.
-
-## Notes
-
-- No API key is required for current GDELT integration.
-- The pipeline is fault-tolerant: source-level failures are logged and do not stop full execution.
-- For PDF export on Windows, install LibreOffice and ensure `soffice` is available in `PATH`.
-- You can add new data sources by adding modules under `src/collectors/`.
+현재 기록은 접속한 기기의 브라우저에 저장됩니다. 두 휴대폰 간 실시간 동기화는 Firebase 연결 후 적용할 예정입니다.
